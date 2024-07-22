@@ -47,6 +47,8 @@ pipeline {
             }
             steps {
                 sh '''
+                    npx playwright --version # Verify that Playwright is installed
+                    npx playwright install # Verify that the browsers are installed
                     npm install serve
                     # serve -s build                    # ... first version (when using -g at npm install -> serve as global dependency)
                     node_modules/.bin/serve -s build &  # serve as local dependency
