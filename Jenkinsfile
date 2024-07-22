@@ -63,6 +63,9 @@ pipeline {
     post {
         always {
             junit 'jest-results/junit.xml'
+            
+            // generated from Jenkins -> Job -> Configure -> Pipeline Syntax (Sample Step: publishHTML)
+            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright HTML Report', reportTitles: '', useWrapperFileDirectly: true])
         }
     }
 }
