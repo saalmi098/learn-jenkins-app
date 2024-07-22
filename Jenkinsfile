@@ -49,7 +49,8 @@ pipeline {
                 sh '''
                     npm install serve
                     # serve -s build                    # ... first version (when using -g at npm install -> serve as global dependency)
-                    node_modules/.bin/serve -s build    # serve as local dependency
+                    node_modules/.bin/serve -s build &  # serve as local dependency
+                                                        # the & character at the end will start the server in the background (so that the jenkins job does not run infinitely)
                     npx playwright test
                 '''
             }
