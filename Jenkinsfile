@@ -41,12 +41,15 @@ pipeline {
                 docker {
                     image 'mcr.microsoft.com/playwright:v1.45.1-jammy'
                     reuseNode true
+                    //args '-u root:root' // running container as root -> not a good idea!!!
+                    // -> better solution: remove "-g" flag in npm install below (serve is not needed as a global dependency) - instead it gets installed as a locale dependency to the project
                 }
             }
             steps {
                 sh '''
-                    npm install -g serve
-                    serve -s build
+                    npm install serve
+                    # serve -s build                    # ... first version (when using -g at npm install -> serve as global dependency)
+                    node_modules/.bin/serve -s build    # serve as local dependency
                     npx playwright test
                 '''
             }
