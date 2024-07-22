@@ -74,7 +74,7 @@ pipeline {
                     post {
                         always {
                             // line generated from Jenkins -> Job -> Configure -> Pipeline Syntax (Sample Step: publishHTML)
-                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright HTML Report', reportTitles: '', useWrapperFileDirectly: true])
+                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright Local', reportTitles: '', useWrapperFileDirectly: true])
                         }
                     }
                 }
@@ -97,6 +97,35 @@ pipeline {
                     node_modules/.bin/netlify status
                     node_modules/.bin/netlify deploy --dir=build --prod
                 '''
+            }
+        }
+
+        stage ('Prod E2E') {
+            agent {
+                docker {
+                    image 'mcr.microsoft.com/playwright:v1.45.1-jammy'
+                    reuseNode true
+                    //args '-u root:root' // running container as root -> not a good idea!!!
+                    // -> better solution: remove "-g" flag in npm install below (serve is not needed as a global dependency) - instead it gets installed as a locale dependency to the project
+                }
+            }
+
+            environment {
+                CI_ENVIRONMENT_URL = 'https://gleeful-dieffenbachia-45e639.netlify.app'
+            }
+
+            steps {
+                sh '''
+                    npx playwright --version
+                    npx playwright install
+                    npx playwright test --reporter=html
+                '''
+            }
+            post {
+                always {
+                    // line generated from Jenkins -> Job -> Configure -> Pipeline Syntax (Sample Step: publishHTML)
+                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright E2E (Prod)', reportTitles: '', useWrapperFileDirectly: true])
+                }
             }
         }
     }
