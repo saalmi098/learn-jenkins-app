@@ -54,7 +54,7 @@ pipeline {
                     node_modules/.bin/serve -s build &  # serve as local dependency
                                                         # the & character at the end will start the server in the background (so that the jenkins job does not run infinitely)
                     sleep 10
-                    npx playwright test
+                    npx playwright test --reporter=html
                 '''
             }
         }
