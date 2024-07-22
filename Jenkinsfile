@@ -101,6 +101,15 @@ pipeline {
             }
         }
 
+        stage('Approval') {
+            steps {
+                // if nothing happens after 15 minutes, the execution will be interrupted (generated with script generator)
+                timeout(time: 15, unit: 'MINUTES') {
+                    input message: 'Do you wish to deploy to production?', ok: 'Yes, I am sure!'
+                }
+            }
+        }
+
         stage('Deploy production') {
             agent {
                 docker {
