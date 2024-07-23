@@ -114,7 +114,9 @@ pipeline {
                     // -> better solution: remove "-g" flag in npm install below (serve is not needed as a global dependency) - instead it gets installed as a locale dependency to the project
                 }
             }
-
+            environment {
+                CI_ENVIRONMENT_URL = 'STAGING_URL_TO_BE_SET'
+            }
             steps {
                 sh '''
                     npm install netlify-cli node-jq
