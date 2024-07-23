@@ -99,9 +99,10 @@ pipeline {
                 '''
                 // if netlify deploy does not have --prod flag, it will automatically create a temporary preview environment
                 // and we will use this one as our staging environment
-            }
-            script {
-                env.STAGING_URL = sh(script: "node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json", returnStdout: true)
+
+                script {
+                    env.STAGING_URL = sh(script: "node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json", returnStdout: true)
+                }
             }
         }
 
