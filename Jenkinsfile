@@ -74,7 +74,7 @@ pipeline {
                     post {
                         always {
                             // line generated from Jenkins -> Job -> Configure -> Pipeline Syntax (Sample Step: publishHTML)
-                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright Local', reportTitles: '', useWrapperFileDirectly: true])
+                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright E2E (Local)', reportTitles: '', useWrapperFileDirectly: true])
                         }
                     }
                 }
@@ -144,7 +144,8 @@ pipeline {
             }
         }
 
-        stage('Deploy production') {
+        // (included in next stage)
+        /*stage('Deploy production') {
             agent {
                 docker {
                     image 'node:18-alpine'
@@ -160,9 +161,9 @@ pipeline {
                     node_modules/.bin/netlify deploy --dir=build --prod
                 '''
             }
-        }
+        }*/
 
-        stage ('Prod E2E') {
+        stage ('Deploy production') {
             agent {
                 docker {
                     image 'mcr.microsoft.com/playwright:v1.45.1-jammy'
@@ -177,7 +178,15 @@ pipeline {
             }
 
             steps {
+                // node is working here because playwright image includes nodeJS
                 sh '''
+                    node --version
+                    npm install netlify-cli
+                    node_modules/.bin/netlify --version
+                    echo "Deploying to production. Site ID: $NETLIFY_SITE_ID"
+                    node_modules/.bin/netlify status
+                    node_modules/.bin/netlify deploy --dir=build --prod
+
                     npx playwright --version
                     npx playwright install
                     npx playwright test --reporter=html
