@@ -4,6 +4,7 @@ pipeline {
     environment {
         NETLIFY_SITE_ID = 'd45b949d-ed4c-4192-ab8d-d79b2ba028c6' // coming from Netlify - Site configuraiton
         NETLIFY_AUTH_TOKEN = credentials('netlify-token')
+        REACT_APP_VERSION = "1.0.$BUILD_ID"
     }
 
     stages {
@@ -139,14 +140,14 @@ pipeline {
             }
         }
 
-        stage('Approval') {
+        /*stage('Approval') {
             steps {
                 // if nothing happens after 15 minutes, the execution will be interrupted (generated with script generator)
                 timeout(time: 15, unit: 'MINUTES') {
                     input message: 'Do you wish to deploy to production?', ok: 'Yes, I am sure!'
                 }
             }
-        }
+        }*/
 
         // (included in next stage)
         /*stage('Deploy production') {
