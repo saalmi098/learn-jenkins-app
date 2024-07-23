@@ -100,6 +100,38 @@ pipeline {
                 // if netlify deploy does not have --prod flag, it will automatically create a temporary preview environment
                 // and we will use this one as our staging environment
             }
+            script {
+                env.STAGING_URL = sh(script: "node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json", returnStdout: true)
+            }
+        }
+
+        stage ('Staging E2E') {
+            agent {
+                docker {
+                    image 'mcr.microsoft.com/playwright:v1.45.1-jammy'
+                    reuseNode true
+                    //args '-u root:root' // running container as root -> not a good idea!!!
+                    // -> better solution: remove "-g" flag in npm install below (serve is not needed as a global dependency) - instead it gets installed as a locale dependency to the project
+                }
+            }
+
+            environment {
+                CI_ENVIRONMENT_URL = "${env.STAGING_URL}"
+            }
+
+            steps {
+                sh '''
+                    npx playwright --version
+                    npx playwright install
+                    npx playwright test --reporter=html
+                '''
+            }
+            post {
+                always {
+                    // line generated from Jenkins -> Job -> Configure -> Pipeline Syntax (Sample Step: publishHTML)
+                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright E2E (Staging)', reportTitles: '', useWrapperFileDirectly: true])
+                }
+            }
         }
 
         stage('Approval') {
