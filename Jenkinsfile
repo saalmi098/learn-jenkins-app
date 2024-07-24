@@ -115,7 +115,8 @@ pipeline {
         stage ('Deploy staging') {
             agent {
                 docker {
-                    image 'mcr.microsoft.com/playwright:v1.45.1-jammy'
+                    //image 'mcr.microsoft.com/playwright:v1.45.1-jammy'
+                    image 'my-playwright'
                     reuseNode true
                     //args '-u root:root' // running container as root -> not a good idea!!!
                     // -> better solution: remove "-g" flag in npm install below (serve is not needed as a global dependency) - instead it gets installed as a locale dependency to the project
@@ -126,7 +127,19 @@ pipeline {
             }
             steps {
                 sh '''
-                    npm install netlify-cli node-jq
+                    netlify --version
+                    echo "Deploying to staging. Site ID: $NETLIFY_SITE_ID"
+                    netlify status
+                    netlify deploy --dir=build --json > deploy-output.json
+                    CI_ENVIRONMENT_URL=$(node-jq -r '.deploy_url' deploy-output.json)
+
+                    npx playwright --version
+                    npx playwright install
+                    npx playwright test --reporter=html
+                '''
+                // old version (without custom docker image):
+                /*sh '''
+                    # npm install netlify-cli node-jq
                     node_modules/.bin/netlify --version
                     echo "Deploying to staging. Site ID: $NETLIFY_SITE_ID"
                     node_modules/.bin/netlify status
@@ -136,7 +149,7 @@ pipeline {
                     npx playwright --version
                     npx playwright install
                     npx playwright test --reporter=html
-                '''
+                '''*/
             }
             post {
                 always {
@@ -177,7 +190,8 @@ pipeline {
         stage ('Deploy production') {
             agent {
                 docker {
-                    image 'mcr.microsoft.com/playwright:v1.45.1-jammy'
+                    //image 'mcr.microsoft.com/playwright:v1.45.1-jammy'
+                    image 'my-playwright'
                     reuseNode true
                     //args '-u root:root' // running container as root -> not a good idea!!!
                     // -> better solution: remove "-g" flag in npm install below (serve is not needed as a global dependency) - instead it gets installed as a locale dependency to the project
@@ -189,8 +203,21 @@ pipeline {
             }
 
             steps {
-                // node is working here because playwright image includes nodeJS
                 sh '''
+                    node --version
+                    netlify --version
+                    echo "Deploying to production. Site ID: $NETLIFY_SITE_ID"
+                    netlify status
+                    netlify deploy --dir=build --prod
+
+                    npx playwright --version
+                    npx playwright install
+                    npx playwright test --reporter=html
+                '''
+
+                // old version (without custom docker image):
+                // node is working here because playwright image includes nodeJS
+                /*sh '''
                     node --version
                     npm install netlify-cli
                     node_modules/.bin/netlify --version
@@ -201,7 +228,7 @@ pipeline {
                     npx playwright --version
                     npx playwright install
                     npx playwright test --reporter=html
-                '''
+                '''*/
             }
             post {
                 always {
