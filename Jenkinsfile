@@ -8,11 +8,13 @@ pipeline {
     }
 
     stages {
-        stage('Docker Setup') {
+        // removed as building the docker image is not needed at every execution
+        // -> image gets now builded nightly to improve performance (see Jenkinsfile-nightly and jenkins job 'nightly-build-docker-image')
+        /*stage('Docker Setup') {
             steps {
                 sh 'docker build -t my-playwright .' // my-playwright ... name for the image
             }
-        }
+        }*/
 
         stage('Build') {
             agent {
